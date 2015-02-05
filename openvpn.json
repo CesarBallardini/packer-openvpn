@@ -1,0 +1,55 @@
+{
+    "variables": {
+        "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+        "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+        "region": "",
+        "ami": ""
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "access_key": "{{user `aws_access_key`}}",
+            "secret_key": "{{user `aws_secret_key`}}",
+            "region": "{{user `region`}}",
+            "source_ami": "{{user `ami`}}",
+            "instance_type": "t2.micro",
+            "ssh_username": "ubuntu",
+            "ami_name": "OpenVPN {{timestamp}}"
+        }
+    ],
+    "provisioners": [
+        {
+          "type": "file",
+          "source": ".google_authenticator",
+          "destination": "~/.google_authenticator"
+        },
+        {
+          "type": "file",
+          "source": "install.sh",
+          "destination": "/tmp/install.sh"
+        },
+        {
+          "type": "file",
+          "source": "create_user.sh",
+          "destination": "/tmp/create_user.sh"
+        },
+        {
+          "type": "file",
+          "source": "rc.local",
+          "destination": "/tmp/rc.local"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo cp -f /tmp/install.sh /root",
+                "sudo chmod 0744 /root/install.sh",
+                "sudo cp -f /tmp/create_user.sh /root",
+                "sudo chmod 0744 /root/create_user.sh",
+                "sudo cp -f /tmp/rc.local /etc",
+                "sudo chmod 0744 /etc/rc.local",
+                "sudo chmod 0400 ~/.google_authenticator",
+                "sudo chown ubuntu:ubuntu ~/.google_authenticator"
+            ]
+        }
+    ]
+}
