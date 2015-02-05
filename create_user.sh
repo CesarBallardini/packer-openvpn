@@ -44,8 +44,8 @@ if [ ! -d /home/ubuntu/vpnconfigs ]; then
 fi
 
 pushd /home/ubuntu/${user}
-mv tunnelblick "$vpn_server_description"
-zip -r /home/ubuntu/vpnconfigs/$user.tblk.zip "$vpn_server_description"
+mv tunnelblick "$vpn_server_description.tblk"
+zip -r /home/ubuntu/vpnconfigs/$user.tblk.zip "$vpn_server_description.tblk"
 popd
 rm -fr /home/ubuntu/${user}
 

@@ -24,7 +24,7 @@ vpn_lan_subnet_ip=${vpn_lan_subnet/\/*/}
 echo "export vpn_server=$vpn_server" > /etc/openvpn/serverinfo
 echo "export vpn_server_port=$vpn_server_port" >> /etc/openvpn/serverinfo
 echo "export vpn_server_description=\"$vpn_server_description\"" >> /etc/openvpn/serverinfo
-echo "export vpn_server_domain=$vpn_server_domain"
+echo "export vpn_server_domain=$vpn_server_domain" >> /etc/openvpn/serverinfo
 
 mkdir -p /etc/openvpn/easy-rsa/
 pushd /etc/openvpn/easy-rsa/
