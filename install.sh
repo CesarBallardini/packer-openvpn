@@ -74,7 +74,8 @@ echo -e "plugin /usr/lib/openvpn/openvpn-plugin-auth-pam.so openvpn" >> /etc/ope
 echo -e "\n# Prevent re-authorization every 3600 seconds" >> /etc/openvpn/server.conf
 echo -e "reneg-sec 0" >> /etc/openvpn/server.conf
 
-echo -e "auth required /lib/security/pam_google_authenticator.so" > /etc/pam.d/openvpn
+echo -e "auth requisite pam_google_authenticator.so forward_pass" > /etc/pam.d/openvpn
+echo -e "auth required pam_unix.so use_first_pass" >> /etc/pam.d/openvpn
 
 popd
 
