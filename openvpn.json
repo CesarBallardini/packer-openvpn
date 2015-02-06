@@ -20,11 +20,6 @@
     "provisioners": [
         {
           "type": "file",
-          "source": ".google_authenticator",
-          "destination": "~/.google_authenticator"
-        },
-        {
-          "type": "file",
           "source": "install.sh",
           "destination": "/tmp/install.sh"
         },
@@ -46,9 +41,7 @@
                 "sudo cp -f /tmp/create_user.sh /root",
                 "sudo chmod 0744 /root/create_user.sh",
                 "sudo cp -f /tmp/rc.local /etc",
-                "sudo chmod 0744 /etc/rc.local",
-                "sudo chmod 0400 ~/.google_authenticator",
-                "sudo chown ubuntu:ubuntu ~/.google_authenticator"
+                "sudo chmod 0744 /etc/rc.local"
             ]
         }
     ]
