@@ -1,3 +1,2 @@
 .envrc
-.google_authenticator
-ec2_amazon-ebs.pem
+.vagrant

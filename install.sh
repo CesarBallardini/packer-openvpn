@@ -15,8 +15,9 @@ vpn_netmask=$(echo $server_info | awk -F';' '{ print $4 }')
 vpn_ssh_passwd=$(echo $server_info | awk -F';' '{ print $5 }')
 vpn_lan_subnet=$(echo $server_info | awk -F';' '{ print $6 }')
 vpn_lan_netmask=$(echo $server_info | awk -F';' '{ print $7 }')
-vpn_server_description="$(echo $server_info | awk -F';' '{ print $8 }')"
-vpn_server_domain=$(echo $server_info | awk -F';' '{ print $9 }')
+vpn_server_domain=$(echo $server_info | awk -F';' '{ print $8 }')
+vpn_server_organization=$(echo $server_info | awk -F';' '{ print $9 }')
+vpn_server_description="$(echo $server_info | awk -F';' '{ print $10 }')"
 
 vpn_subnet_ip=${vpn_subnet/\/*/}
 vpn_lan_subnet_ip=${vpn_lan_subnet/\/*/}
@@ -25,6 +26,7 @@ echo "export vpn_server=$vpn_server" > /etc/openvpn/serverinfo
 echo "export vpn_server_port=$vpn_server_port" >> /etc/openvpn/serverinfo
 echo "export vpn_server_description=\"$vpn_server_description\"" >> /etc/openvpn/serverinfo
 echo "export vpn_server_domain=$vpn_server_domain" >> /etc/openvpn/serverinfo
+echo "export vpn_server_organization=$vpn_server_organization" >> /etc/openvpn/serverinfo
 
 mkdir -p /etc/openvpn/easy-rsa/
 pushd /etc/openvpn/easy-rsa/
@@ -34,11 +36,11 @@ cp -r /usr/share/easy-rsa/* /etc/openvpn/easy-rsa/
 sed -i 's|export KEY_COUNTRY=\".*\"|export KEY_COUNTRY="US"|' vars
 sed -i 's|export KEY_PROVINCE=\".*\"|export KEY_PROVINCE="DE"|' vars
 sed -i 's|export KEY_CITY=\".*\"|export KEY_CITY="Wilmington"|' vars
-sed -i 's|export KEY_ORG=\".*\"|export KEY_ORG="Leapvest"|' vars
-sed -i 's|export KEY_EMAIL=\".*\"|export KEY_EMAIL="support@leapvest.com"|' vars
-sed -i 's|export KEY_CN=\".*\"|export KEY_CN="Leapvest_AWS_VPN"|' vars
-sed -i 's|export KEY_NAME=\".*\"|export KEY_NAME="Leapvest_AWS_VPN"|' vars
-sed -i 's|export KEY_OU=\".*\"|export KEY_OU="Leapvest_AWS_VPN"|' vars
+sed -i "s|export KEY_ORG=\".*\"|export KEY_ORG=\"${vpn_server_organization}\"|" vars
+sed -i "s|export KEY_EMAIL=\".*\"|export KEY_EMAIL=\"support@${vpn_server_domain}\"|" vars
+sed -i "s|export KEY_CN=\".*\"|export KEY_CN=\"${vpn_server_organization}_AWS_VPN\"|" vars
+sed -i "s|export KEY_NAME=\".*\"|export KEY_NAME=\"${vpn_server_organization}_AWS_VPN\"|" vars
+sed -i "s|export KEY_OU=\".*\"|export KEY_OU=\"${vpn_server_organization}_AWS_VPN\"|" vars
 
 for f in $(ls build*); do sed -i "s|\-\-interact ||" $f; done
 
