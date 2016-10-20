@@ -7,7 +7,7 @@ service openvpn stop
 
 hn=$(hostname)
 
-server_info=$(curl http://169.254.169.254/latest/user-data)
+[ -n "$server_info" ] || server_info=$(curl http://169.254.169.254/latest/user-data)
 vpn_server=$(echo $server_info | awk -F';' '{ print $1 }')
 vpn_server_port=$(echo $server_info | awk -F';' '{ print $2 }')
 vpn_subnet=$(echo $server_info | awk -F';' '{ print $3 }')
@@ -18,6 +18,7 @@ vpn_lan_netmask=$(echo $server_info | awk -F';' '{ print $7 }')
 vpn_server_domain=$(echo $server_info | awk -F';' '{ print $8 }')
 vpn_server_organization=$(echo $server_info | awk -F';' '{ print $9 }')
 vpn_server_description="$(echo $server_info | awk -F';' '{ print $10 }')"
+vpn_tunnel_all_traffic="$(echo $server_info | awk -F';' '{ print $11 }')"
 
 vpn_subnet_ip=${vpn_subnet/\/*/}
 vpn_lan_subnet_ip=${vpn_lan_subnet/\/*/}
@@ -65,17 +66,26 @@ sed -i "s/^key .*\.key/key $hn.key/" /etc/openvpn/server.conf
 sed -i "s/^dh .*\.pem/dh dh2048.pem/" /etc/openvpn/server.conf
 sed -i "s/^;tls-auth/tls-auth/" /etc/openvpn/server.conf
 sed -i "s/^;cipher AES-128-CBC/cipher AES-256-CBC/" /etc/openvpn/server.conf
+sed -i "s/^;user nobody/user nobody/" /etc/openvpn/server.conf
+sed -i "s/^;group nogroup/group nogroup/" /etc/openvpn/server.conf
+
+if [ "$vpn_tunnel_all_traffic" == "yes" ]; then
+    sed -i "s/^;push \"redirect-gateway def1 bypass-dhcp\"/push \"redirect-gateway def1 bypass-dhcp\"/" /etc/openvpn/server.conf
+    sed -i "s/^;push \"dhcp-option DNS 208.67.222.222\"/push \"dhcp-option DNS 208.67.222.222\"/" /etc/openvpn/server.conf
+    sed -i "s/^;push \"dhcp-option DNS 208.67.220.220\"/push \"dhcp-option DNS 208.67.220.220\"/" /etc/openvpn/server.conf
+fi
 
 echo -e "\n# Internal LAN" >> /etc/openvpn/server.conf
 echo -e "topology subnet" >> /etc/openvpn/server.conf
 echo -e "push \"route $vpn_lan_subnet_ip $vpn_lan_netmask\"" >> /etc/openvpn/server.conf
 
-echo -e "\n# Enable Multi-Factor Authentication" >> /etc/openvpn/server.conf
+echo -e "\n# Enable PAM Authentication" >> /etc/openvpn/server.conf
 echo -e "plugin /usr/lib/openvpn/openvpn-plugin-auth-pam.so openvpn" >> /etc/openvpn/server.conf
 
 echo -e "\n# Prevent re-authorization every 3600 seconds" >> /etc/openvpn/server.conf
 echo -e "reneg-sec 0" >> /etc/openvpn/server.conf
 
+echo -e "# Enable Multi-Factor Authentication"
 echo -e "auth requisite pam_google_authenticator.so forward_pass" > /etc/pam.d/openvpn
 echo -e "auth required pam_unix.so use_first_pass" >> /etc/pam.d/openvpn
 
